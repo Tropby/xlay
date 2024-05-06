@@ -8,7 +8,7 @@ class Image
 {
     const SCALE = 20;
 
-    public function render(\XLay\Board & $board, $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER, array $backgroundColor = [50, 50, 50])
+    public function render(\XLay\Board & $board, $filename = null, $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER, array $backgroundColor = [50, 50, 50])
     {
         $img = imagecreatetruecolor($board->getSizeX() * Image::SCALE, $board->getSizeY() * Image::SCALE);
 
@@ -41,8 +41,9 @@ class Image
             }
         }
 
-        header("Content-Type: image/png");
-        imagepng($img);
+        if( $filename == null )
+            header("Content-Type: image/png");
+        imagepng($img, $filename);
     }
 
     private function getColor(& $img, int $layer) : int
