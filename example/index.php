@@ -10,4 +10,4 @@ $xlay = new \XLay\XLay();
 $xlay->load("test.lay6");
 
 $renderer = new \XLay\Renderer\Image();
-$renderer->render($xlay->getFile()->getBoards()[0]);
+$renderer->render($xlay->getFile()->getBoards()[0], \XLay\Layer::LAYERS_DEFAULT_ORDER);

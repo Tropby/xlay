@@ -21,7 +21,7 @@ class Item
 
     private int $styleCustom;
 
-    private int $groundDistance;
+    private float $groundDistance;
     private int $thermobarier;
     private int $flipVertical;
     private int $cutoff;
@@ -42,25 +42,32 @@ class Item
         $this->out = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->in = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->lineWidth = Helper::getUInt32($data) / 10000.0;
-        Helper::getRawData($data, 1);; // reserved
+        Helper::getUInt8($data);; // reserved
         $this->layer = Helper::getUInt8($data);
         if( $layer ) $this->layer =  $layer;
         $this->shape = Helper::getUInt8($data);
-        Helper::getRawData($data, 4); // reserved
+        Helper::getUInt32($data); // reserved
         $this->componentId = Helper::getUInt16($data);
         $this->selected = Helper::getUInt8($data);
         $this->style = Helper::getRawData($data, 4);
-        Helper::getRawData($data, 5); // reserved
+        Helper::getUInt8($data);
+        Helper::getUInt8($data);
+        Helper::getUInt8($data);
+        Helper::getUInt8($data);
+        Helper::getUInt8($data);
         $this->styleCustom = Helper::getUInt8($data);
         $this->groundDistance = Helper::getUInt32($data) / 10000.0;
-        Helper::getRawData($data, 5); // reserved
+        Helper::getUInt32($data); // reserved
+        Helper::getUInt8($data);
         $this->thermobarier = Helper::getUInt8($data);
         $this->flipVertical = Helper::getUInt8($data);
         $this->cutoff = Helper::getUInt8($data);
         $this->thzise = Helper::getUInt32($data);
         $this->metalisation = Helper::getUInt8($data);
         $this->soldermask = Helper::getUInt8($data);
-        Helper::getRawData($data, 18); // reserved
+        Helper::getUInt8($data);
+        Helper::getUInt8($data);
+        Helper::getRawData($data, 16); // reserved
 
         if( !$textChild )
         {
@@ -170,6 +177,11 @@ class Item
     public function getType() : int
     {
         return $this->type;
+    }
+
+    public function getPlatedThrough() : bool
+    {
+        return $this->metalisation;
     }
 
     public function getTHTShape() : int

@@ -8,13 +8,11 @@ class Image
 {
     const SCALE = 20;
 
-    const DEFAULT_LAYERS = [\XLay\Layer::C1,\XLay\Layer::C2,\XLay\Layer::S1,\XLay\Layer::S2,\XLay\Layer::I1,\XLay\Layer::I2,\XLay\Layer::O];
-
-    public function render(\XLay\Board & $board, $layers = Image::DEFAULT_LAYERS)
+    public function render(\XLay\Board & $board, $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER, array $backgroundColor = [50, 50, 50])
     {
         $img = imagecreatetruecolor($board->getSizeX() * Image::SCALE, $board->getSizeY() * Image::SCALE);
 
-        $color = imagecolorallocate($img, 50, 50, 50);
+        $color = imagecolorallocate($img, $backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
         imagefill($img, 0, 0, $color);
         $color = imagecolorallocate($img, 250, 250, 250);
 
@@ -36,7 +34,7 @@ class Image
         {
             foreach($objects as $object)
             {
-                if( $object->getLayer() == $layer )
+                if( $object->getLayer() == $layer || $object->getType() == \XLay\ItemType::THT_PAD)
                 {
                     $this->drawObject($img, $object, 2);
                 }
@@ -58,6 +56,7 @@ class Image
             case \XLay\Layer::I1: return imagecolorallocate($img, 194, 124, 20);
             case \XLay\Layer::I2: return imagecolorallocate($img, 238, 182, 98);
             case \XLay\Layer::O: return imagecolorallocate($img, 255, 255, 255);
+            case \XLay\Layer::M: return imagecolorallocate($img, 81, 227, 253);
             default: return imagecolorallocate($img, 255, 255, 0);
         }
     }
@@ -104,7 +103,8 @@ class Image
                 break;
 
             case \XLay\ItemType::THT_PAD:
-                if( $step == 2 ) $this->drawTHTPad($img, $item);
+                if( $step == 1 ) $this->drawTHTPad($img, $item);
+                if( $step == 2 ) $this->drawDrill($img, $item);
                 break;
 
             case \XLay\ItemType::SMD_PAD:
@@ -112,7 +112,7 @@ class Image
                 break;
 
             case \XLay\ItemType::TEXT:
-                if( $step == 2 ) $this->drawLine($img, $item);
+                if( $step == 1 ) $this->drawLine($img, $item);
                 break;
     
             default:
@@ -162,11 +162,28 @@ class Image
             IMG_COLOR_BRUSHED);
     }
 
+    private function drawDrill(& $img, \XLay\Item $item)
+    {
+        $color = imagecolorallocate($img, 0, 0, 0);
+        imagefilledarc(
+            $img,
+            $item->getX() * Image::SCALE,
+            -$item->getY() * Image::SCALE,
+            $item->getInnerRadius() * Image::SCALE,
+            $item->getInnerRadius() * Image::SCALE,
+            0,0,
+            $color, IMG_ARC_PIE);
+    }
+
     private function drawTHTPad(& $img, \XLay\Item $item)
     {
         $shape = $item->getTHTShape();
 
-        $color = $this->getColor($img, $item->getLayer());
+        if( $item->getPlatedThrough() )
+            $color = $this->getColor($img, \XLay\Layer::M);
+        else
+            $color = $this->getColor($img, $item->getLayer());
+
         switch($shape)
         {
             case \XLay\ShapeType::CIRCLE:
@@ -222,7 +239,11 @@ class Image
                 break;
 
             case \XLay\ShapeType::CIRCLE_H:
-                $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                if( $item->getPlatedThrough() )
+                    $this->setBrush($img, \XLay\Layer::M, $item->getOuterRadius() * Image::SCALE);
+                else
+                    $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+
                 imageline(
                     $img,
                     $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE/2,
@@ -275,7 +296,11 @@ class Image
                 break;
 
             case \XLay\ShapeType::CIRCLE_V:
-                $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                if( $item->getPlatedThrough() )
+                    $this->setBrush($img, \XLay\Layer::M, $item->getOuterRadius() * Image::SCALE);
+                else
+                    $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+
                 imageline(
                     $img,
                     $item->getX() * Image::SCALE,
@@ -328,18 +353,9 @@ class Image
                 break;
 
             default:
+                throw new \Exception("Unknwon THT Shape [$shape]!");
                 break;
         }
-
-        $color = imagecolorallocate($img, 0, 0, 0);
-        imagefilledarc(
-            $img,
-            $item->getX() * Image::SCALE,
-            -$item->getY() * Image::SCALE,
-            $item->getInnerRadius() * Image::SCALE,
-            $item->getInnerRadius() * Image::SCALE,
-            0,0,
-            $color, IMG_ARC_PIE);
     }
 
     private function drawLine(& $img, \XLay\Item $item)
