@@ -18,7 +18,7 @@ if( isset( $_FILES["lay6"] ) )
 
     $filename = uniqid("cache_").".png";
 
-    if( endsWith($_FILES["lay6"]["tmp_name"], ".lay6") ) 
+    if( substr($_FILES["lay6"]["name"], -5) == ".lay6" )
     {
         $file = \XLay\XLay::loadLay6($_FILES["lay6"]["tmp_name"]);
         $renderer = new \XLay\Renderer\Image();
@@ -41,7 +41,7 @@ if( isset( $_FILES["lay6"] ) )
         <h1>Upload your layout</h1>
         <form method="POST" enctype="multipart/form-data" >
             <input type="file" name="lay6" /><br /><br />
-            <input type="submit" value="Upload Lay6 File" name="submit" />
+            <input type="submit" value="Upload *.lay6/*.lmk File" name="submit" />
         </form>
         <hr />
 <?php

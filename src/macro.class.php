@@ -39,10 +39,17 @@ class Macro
             $rect = Helper::combineRects( $rect, $object->getBoundingReact() );
         }
 
-        $this->width = $rect[2] - $rect[0];
-        $this->height = $rect[3] - $rect[1];
+        $this->width = $rect[2] - $rect[0] + 3;
+        $this->height = $rect[3] - $rect[1] + 3;
         $this->offset[0] = -$rect[0] + 3;
         $this->offset[1] = $rect[3] + 3;
+
+        echo "<pre>
+            width: {$this->width}<br />
+            height: {$this->height}<br />
+            OX: {$this->offset[0]}<br />
+            OY: {$this->offset[1]}<hr />
+        </pre>";
 
         for( $i = 0; $i < $connectionCount; $i++ )
         {
