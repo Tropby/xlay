@@ -172,6 +172,11 @@ class Item
         return $this->type;
     }
 
+    public function getTHTShape() : int
+    {
+        return $this->shape;
+    }
+
     public function getLayer() : int
     {
         return $this->layer;

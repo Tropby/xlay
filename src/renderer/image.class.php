@@ -164,15 +164,172 @@ class Image
 
     private function drawTHTPad(& $img, \XLay\Item $item)
     {
+        $shape = $item->getTHTShape();
+
         $color = $this->getColor($img, $item->getLayer());
-        imagefilledarc(
-            $img,
-            $item->getX() * Image::SCALE,
-            -$item->getY() * Image::SCALE,
-            $item->getOuterRadius() * Image::SCALE,
-            $item->getOuterRadius() * Image::SCALE,
-            0,0,
-            $color, IMG_ARC_PIE);
+        switch($shape)
+        {
+            case \XLay\ShapeType::CIRCLE:
+                imagefilledarc(
+                    $img,
+                    $item->getX() * Image::SCALE,
+                    -$item->getY() * Image::SCALE,
+                    $item->getOuterRadius() * Image::SCALE,
+                    $item->getOuterRadius() * Image::SCALE,
+                    0,0,
+                    $color, IMG_ARC_PIE);
+                break;
+
+            case \XLay\ShapeType::SQUARE:
+                imagefilledrectangle(
+                    $img,
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    $color);
+                break;
+
+            case \XLay\ShapeType::OCTAGON:
+
+                $points = [
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4
+                ];
+
+                imagefilledpolygon($img, $points, 8, $color);
+                break;
+
+            case \XLay\ShapeType::CIRCLE_H:
+                $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                imageline(
+                    $img,
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE,
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE,
+                    IMG_COLOR_BRUSHED
+                );
+                break;
+
+            case \XLay\ShapeType::OCTAGON_H:
+
+                $points = [
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4 - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4 + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4 + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4 - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4
+                ];
+
+                imagefilledpolygon($img, $points, 8, $color);
+                break;
+
+            case \XLay\ShapeType::RECT_H:
+                imagefilledrectangle(
+                    $img,
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    $color);
+                break;
+
+            case \XLay\ShapeType::CIRCLE_V:
+                $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                imageline(
+                    $img,
+                    $item->getX() * Image::SCALE,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE/2,
+                    $item->getX() * Image::SCALE,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE/2,
+                    IMG_COLOR_BRUSHED
+                );
+                break;
+
+            case \XLay\ShapeType::OCTAGON_V:
+
+                $points = [
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4 + $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4 + $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4 - $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 4 - $item->getOuterRadius() * Image::SCALE/2
+                ];
+
+                imagefilledpolygon($img, $points, 8, $color);
+                break;
+
+            case \XLay\ShapeType::RECT_V:
+                imagefilledrectangle(
+                    $img,
+                    $item->getX() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE - $item->getOuterRadius() * Image::SCALE / 2 - $item->getOuterRadius() * Image::SCALE/2,
+                    $item->getX() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2,
+                    -$item->getY() * Image::SCALE + $item->getOuterRadius() * Image::SCALE / 2 + $item->getOuterRadius() * Image::SCALE/2,
+                    $color);
+                break;
+
+            default:
+                break;
+        }
 
         $color = imagecolorallocate($img, 0, 0, 0);
         imagefilledarc(
