@@ -8,7 +8,9 @@ class Image
 {
     const SCALE = 20;
 
-    public function render(\XLay\Board & $board)
+    const DEFAULT_LAYERS = [\XLay\Layer::C1,\XLay\Layer::C2,\XLay\Layer::S1,\XLay\Layer::S2,\XLay\Layer::I1,\XLay\Layer::I2,\XLay\Layer::O];
+
+    public function render(\XLay\Board & $board, $layers = Image::DEFAULT_LAYERS)
     {
         $img = imagecreatetruecolor($board->getSizeX() * Image::SCALE, $board->getSizeY() * Image::SCALE);
 
@@ -18,14 +20,27 @@ class Image
 
         $objects = $board->getObjects();
 
-        foreach($objects as $object)
+        ;
+        foreach( $layers as $layer )
         {
-            $this->drawObject($img, $object, 1);
+            foreach($objects as $object)
+            {
+                if( $object->getLayer() == $layer )
+                {
+                    $this->drawObject($img, $object, 1);
+                }
+            }
         }
 
-        foreach($objects as $object)
+        foreach( $layers as $layer )
         {
-            $this->drawObject($img, $object, 2);
+            foreach($objects as $object)
+            {
+                if( $object->getLayer() == $layer )
+                {
+                    $this->drawObject($img, $object, 2);
+                }
+            }
         }
 
         header("Content-Type: image/png");
@@ -84,15 +99,50 @@ class Image
                 if( $step == 1 ) $this->drawCircle($img, $item);
                 break;
 
+            case \XLay\ItemType::POLY:
+                if( $step == 1 ) $this->drawPoly($img, $item);
+                break;
+
             case \XLay\ItemType::THT_PAD:
                 if( $step == 2 ) $this->drawTHTPad($img, $item);
+                break;
+
+            case \XLay\ItemType::SMD_PAD:
+                if( $step == 1 ) $this->drawSMDPad($img, $item);
                 break;
 
             case \XLay\ItemType::TEXT:
                 if( $step == 2 ) $this->drawLine($img, $item);
                 break;
     
+            default:
+                throw new \Exception("Unknown Object ".$item->getType()." Type!");
+                break;
         }
+    }
+
+    private function drawSMDPad(& $img, \XLay\Item $item)
+    {
+        $this->setBrush($img, $item->getLayer(), 1);
+
+        $subItems = $item->getTextObjects();
+        foreach( $subItems as $si )
+        {
+            $this->drawObject($img, $si, 1);
+        }
+
+        $points = $item->getPoints();
+        $arr = [];
+        foreach( $points as $point )
+        {
+            $arr[] = $point->getX() * Image::SCALE;
+            $arr[] = -$point->getY() * Image::SCALE;
+        }
+
+        $size = 1;
+        $this->setBrush($img, $item->getLayer(), $size);
+
+        imagefilledpolygon($img, $arr, count($arr)/2, IMG_COLOR_BRUSHED);
     }
 
     private function drawCircle(& $img, \XLay\Item $item)
@@ -168,6 +218,31 @@ class Image
 
             $last = $point;
         }
+    }
+
+    private function drawPoly(& $img, \XLay\Item $item)
+    {
+        $subItems = $item->getTextObjects();
+        foreach( $subItems as $si )
+        {
+            $this->drawObject($img, $si, 1);
+        }
+
+        $points = $item->getPoints();
+        $first = true;
+        $last = new \XLay\Point();
+        $arr = [];
+        foreach( $points as $point )
+        {
+            $arr[] = $point->getX() * Image::SCALE;
+            $arr[] = -$point->getY() * Image::SCALE;
+        }
+
+        $size = $item->getLineWidth()*Image::SCALE;
+        if( $size < 1 ) $size = 1;
+        $this->setBrush($img, $item->getLayer(), $size);
+
+        imagefilledpolygon($img, $arr, count($arr)/2, IMG_COLOR_BRUSHED);
     }
 
 }
