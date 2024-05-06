@@ -15,22 +15,20 @@ function endsWith( $haystack, $needle ) {
 if( isset( $_FILES["lay6"] ) )
 {
     require_once("../src/xlay.inc.php");
-    $xlay = new \XLay\XLay();
 
     $filename = uniqid("cache_").".png";
 
     if( endsWith($_FILES["lay6"]["tmp_name"], ".lay6") ) 
     {
-        $file = $xlay->loadLay6($_FILES["lay6"]["tmp_name"]);
+        $file = \XLay\XLay::loadLay6($_FILES["lay6"]["tmp_name"]);
         $renderer = new \XLay\Renderer\Image();
         $renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
     }
     else
     {
-        $file = $xlay->loadMacro($_FILES["lay6"]["tmp_name"]);
+        $file = \XLay\XLay::loadMacro($_FILES["lay6"]["tmp_name"]);
         $renderer = new \XLay\Renderer\Image();
         $renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
-
     }
 }
 

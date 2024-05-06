@@ -9,19 +9,32 @@ The core feature of this library is to analyze a `*.lay6` file and draw its cont
 
 ## Short Example
 
+### Render board 0 from a lay6-fiel
 ``` php
 <?php
 
 require_once("../src/xlay.inc.php");
 
-$xlay = new \XLay\XLay();
-$xlay->load("test.lay6");
-
+$file = \XLay\XLay::loadLay6("test.lay6");
 $renderer = new \XLay\Renderer\Image();
-$renderer->render($xlay->getFile()->getBoards()[0]);
+$renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
+
 ```
 
 ![](res/img/output.png)
+
+### Render a macro
+
+``` php
+<?php
+
+require_once("../src/xlay.inc.php");
+
+$file = \XLay\XLay::loadMacro("test.lay6");
+$renderer = new \XLay\Renderer\Image();
+$renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+
+```
 
 ## ToDo
 
