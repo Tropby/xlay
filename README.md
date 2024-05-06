@@ -30,7 +30,7 @@ $renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_
 
 require_once("../src/xlay.inc.php");
 
-$file = \XLay\XLay::loadMacro("test.lay6");
+$file = \XLay\XLay::loadMacro("test.lmk");
 $renderer = new \XLay\Renderer\Image();
 $renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
 
