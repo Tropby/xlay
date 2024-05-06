@@ -9,7 +9,7 @@ The core feature of this library is to analyze a `*.lay6` file and draw its cont
 
 ## Short Example
 
-### Render board 0 from a lay6-fiel
+### Render board 0 from a lay6-file
 ``` php
 <?php
 
