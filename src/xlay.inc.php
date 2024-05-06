@@ -2,6 +2,7 @@
 
 require_once("xlay.class.php");
 require_once("file.class.php");
+require_once("macro.class.php");
 require_once("helper.class.php");
 require_once("fileheader.class.php");
 require_once("layer.class.php");

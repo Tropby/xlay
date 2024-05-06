@@ -169,6 +169,31 @@ class Item
         return $result / 1000;
     }
 
+    public function getBoundingReact() : array
+    {
+        $top = 999999;
+        $left = 999999;
+        $bottom = -99999;
+        $right = -99999;
+
+        foreach($this->points as $point)
+        {
+            $left = min( $left, $point->getX() );
+            $top = min( $top, $point->getY() );
+            $right = max($right, $point->getX());
+            $bottom = max($bottom, $point->getY());
+        }
+        $r1 = [$left, $top, $right, $bottom];
+
+        foreach( $this->textObjects as $to )
+        {
+            $r2 = $to->getBoundingReact();
+            $r1 = Helper::combineRects($r1, $r2);
+        }
+
+        return $r1;
+    }
+
     public function getY() : float
     {
         return $this->y;

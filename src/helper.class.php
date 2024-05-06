@@ -4,6 +4,15 @@ namespace XLay;
 
 class Helper 
 {
+    static public function combineRects(array $r1, array $r2)
+    {
+        $r1[0] = min($r1[0], $r2[0]);
+        $r1[1] = min($r1[1], $r2[1]);
+        $r1[2] = max($r1[2], $r2[2]);
+        $r1[3] = max($r1[3], $r2[3]);
+        return $r1;
+    }
+
     static public function getInt32(array & $data) : int
     {
         $result = 0;

@@ -4,16 +4,34 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+function endsWith( $haystack, $needle ) {
+    $length = strlen( $needle );
+    if( !$length ) {
+        return true;
+    }
+    return substr( $haystack, -$length ) === $needle;
+}
+
 if( isset( $_FILES["lay6"] ) )
 {
     require_once("../src/xlay.inc.php");
     $xlay = new \XLay\XLay();
-    $xlay->load($_FILES["lay6"]["tmp_name"]);
 
     $filename = uniqid("cache_").".png";
 
-    $renderer = new \XLay\Renderer\Image();
-    $renderer->render($xlay->getFile()->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
+    if( endsWith($_FILES["lay6"]["tmp_name"], ".lay6") ) 
+    {
+        $file = $xlay->loadLay6($_FILES["lay6"]["tmp_name"]);
+        $renderer = new \XLay\Renderer\Image();
+        $renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
+    }
+    else
+    {
+        $file = $xlay->loadMacro($_FILES["lay6"]["tmp_name"]);
+        $renderer = new \XLay\Renderer\Image();
+        $renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+
+    }
 }
 
 ?>

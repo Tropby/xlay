@@ -4,37 +4,43 @@ namespace XLay;
 
 class XLay
 {
-    private array $rawData;
-    private File $file;
-
-    public function load(string $filename)
+    public static function loadLay6(string $filename) : File
     {
-        $this->rawData = [];
+        $rawData = [];
         $fp = fopen($filename, "rb");
         while(!feof($fp) )
         {
             $data = fread($fp, 512);
             foreach( str_split($data) as $d)
             {
-                $this->rawData[] = ord($d);
+                $rawData[] = ord($d);
             }
         }
         fclose($fp);
 
-        $this->file = new File();
-        $this->file->parse($this->rawData);
+        $file = new File();
+        $file->parse($rawData);
+
+        return $file;
     }
 
-    public function showAsHex()
+    public static function loadMacro(string $filename) : Macro
     {
-        while(($d = next($this->rawData)) !== false)
+        $rawData = [];
+        $fp = fopen($filename, "rb");
+        while(!feof($fp) )
         {
-            printf("%02X ", $d);
+            $data = fread($fp, 512);
+            foreach( str_split($data) as $d)
+            {
+                $rawData[] = ord($d);
+            }
         }
-    }
+        fclose($fp);
 
-    public function getFile() : File
-    {
-        return $this->file;
+        $file = new Macro();
+        $file->parse($rawData);
+
+        return $file;
     }
 }
