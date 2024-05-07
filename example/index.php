@@ -12,24 +12,36 @@ function endsWith( $haystack, $needle ) {
     return substr( $haystack, -$length ) === $needle;
 }
 
-if( isset( $_FILES["lay6"] ) )
+if( isset( $_FILES["lay6"] ))
 {
     require_once("../src/xlay.inc.php");
 
     $filename = uniqid("cache_").".png";
 
+    $renderer = new \XLay\Renderer\Image();
+    if( isset($_POST["photo"]))
+    {
+        $renderer->setColorScheme(\XLay\Layer::COLORS_FOTO);
+    }
+
+    switch( $_POST["layers"] )
+    {
+        case "LAYERS_TOP_ONLY_ORDER": $layers = \XLay\Layer::LAYERS_TOP_ONLY_ORDER; break;
+        case "LAYERS_BOTTOM_ONLY_ORDER": $layers = \XLay\Layer::LAYERS_BOTTOM_ONLY_ORDER; break;
+        default: $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER; break;
+    }
+
     if( substr($_FILES["lay6"]["name"], -5) == ".lay6" )
     {
         $file = \XLay\XLay::loadLay6($_FILES["lay6"]["tmp_name"]);
-        $renderer = new \XLay\Renderer\Image();
-        $renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
+        unlink($_FILES["lay6"]["tmp_name"]);
+        $renderer->render($file->getBoards()[0], $filename, $layers, [0,0], isset($_POST["fliph"]));
     }
     else
     {
         $file = \XLay\XLay::loadMacro($_FILES["lay6"]["tmp_name"]);
-        $renderer = new \XLay\Renderer\Image();
-        $renderer->setColorScheme(\XLay\Layer::COLORS_FOTO);
-        $renderer->render($file, $filename, \XLay\Layer::LAYERS_BOTTOM_ONLY_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+        unlink($_FILES["lay6"]["tmp_name"]);
+        $renderer->render($file, $filename, $layers, [$file->getOffsetX(),$file->getOffsetY()], isset($_POST["fliph"]));
     }
 }
 
@@ -42,6 +54,13 @@ if( isset( $_FILES["lay6"] ) )
         <h1>Upload your layout</h1>
         <form method="POST" enctype="multipart/form-data" >
             <input type="file" name="lay6" /><br /><br />
+            <select name="layers">
+                <option value="LAYERS_DEFAULT_ORDER">Layout Default</option>
+                <option value="LAYERS_TOP_ONLY_ORDER">Top Only</option>
+                <option value="LAYERS_BOTTOM_ONLY_ORDER">Bottom Only</option>
+            </select><br /><br />
+            <input type="checkbox" name="photo" id="photo" /> <label for="photo">Photo Renderer</label><br /><br />
+            <input type="checkbox" name="fliph" /> <label for="fliph">Flip Horizontal</label><br /><br />
             <input type="submit" value="Upload *.lay6/*.lmk File" name="submit" />
         </form>
         <hr />

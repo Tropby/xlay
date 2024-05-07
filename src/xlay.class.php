@@ -6,6 +6,11 @@ class XLay
 {
     public static function loadLay6(string $filename) : File
     {
+        if( !$filename || !file_exists($filename))
+        {
+            throw new \Exception("File not found: \"$filename\"");
+        }
+        
         $rawData = [];
         $fp = fopen($filename, "rb");
         while(!feof($fp) )
@@ -26,6 +31,11 @@ class XLay
 
     public static function loadMacro(string $filename) : Macro
     {
+        if( !$filename || !file_exists($filename))
+        {
+            throw new \Exception("File not found: \"$filename\"");
+        }
+
         $rawData = [];
         $fp = fopen($filename, "rb");
         while(!feof($fp) )

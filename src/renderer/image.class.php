@@ -20,15 +20,15 @@ class Image
         & $board,
         $filename = null,
         $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER,
-        array $backgroundColor = [50, 50, 50],
-        $offset = [0,0]
+        $offset = [0,0],
+        $flipHorizontal = false
     )
     {
         $this->offset = $offset;
 
         $img = imagecreatetruecolor(($board->getSizeX() + $offset[0]) * Image::SCALE, ($board->getSizeY() + $offset[1]) * Image::SCALE);
 
-        $color = imagecolorallocate($img, $backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
+        $color = $this->getColor($img, \XLay\Layer::B);
         imagefill($img, 0, 0, $color);
         $color = imagecolorallocate($img, 250, 250, 250);
 
@@ -38,7 +38,15 @@ class Image
         {
             foreach($objects as $object)
             {
-                if( $object->getLayer() == $layer )
+                if( $object->getLayer() == $layer && !$object->getSoldermask())
+                {
+                    $this->drawObject($img, $object, 1);
+                }
+            }
+
+            foreach($objects as $object)
+            {
+                if( $object->getLayer() == $layer && $object->getSoldermask())
                 {
                     $this->drawObject($img, $object, 1);
                 }
@@ -54,6 +62,11 @@ class Image
                     $this->drawObject($img, $object, 2);
                 }
             }
+        }
+
+        if( $flipHorizontal )
+        {
+            imageflip($img, IMG_FLIP_HORIZONTAL);
         }
 
         if( $filename == null )
@@ -163,7 +176,18 @@ class Image
     {
         $size = ($item->getOuterRadius()-$item->getInnerRadius())/2*Image::SCALE;
 
-        $this->setBrush($img, $item->getLayer(), $size);
+        $layer = $item->getLayer();
+        if( $item->getPlatedThrough() )
+        {
+            $layer = \XLay\Layer::M;
+        }
+
+        if( $item->getSoldermask() )
+        {
+            $layer = $layer | \XLay\Layer::COPPER;
+        }
+
+        $this->setBrush($img, $layer, $size);
 
         imagearc(
             $img,
@@ -193,10 +217,18 @@ class Image
     {
         $shape = $item->getTHTShape();
 
+        $layer = $item->getLayer();
         if( $item->getPlatedThrough() )
-            $color = $this->getColor($img, \XLay\Layer::M);
-        else
-            $color = $this->getColor($img, $item->getLayer());
+        {
+            $layer = \XLay\Layer::M;
+        }
+
+        if( $item->getSoldermask() )
+        {
+            $layer = $layer | \XLay\Layer::COPPER;
+        }
+
+        $color = $this->getColor($img, $layer);
 
         switch($shape)
         {
@@ -253,10 +285,7 @@ class Image
                 break;
 
             case \XLay\ShapeType::CIRCLE_H:
-                if( $item->getPlatedThrough() )
-                    $this->setBrush($img, \XLay\Layer::M, $item->getOuterRadius() * Image::SCALE);
-                else
-                    $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                $this->setBrush($img, $layer, $item->getOuterRadius() * Image::SCALE);
 
                 imageline(
                     $img,
@@ -310,10 +339,7 @@ class Image
                 break;
 
             case \XLay\ShapeType::CIRCLE_V:
-                if( $item->getPlatedThrough() )
-                    $this->setBrush($img, \XLay\Layer::M, $item->getOuterRadius() * Image::SCALE);
-                else
-                    $this->setBrush($img, $item->getLayer(), $item->getOuterRadius() * Image::SCALE);
+                $this->setBrush($img, $layer, $item->getOuterRadius() * Image::SCALE);
 
                 imageline(
                     $img,
@@ -390,7 +416,18 @@ class Image
                 $size = $item->getLineWidth()*Image::SCALE;
                 if( $size < 1 ) $size = 1;
 
-                $this->setBrush($img, $item->getLayer(), $size);
+                $layer = $item->getLayer();
+                if( $item->getPlatedThrough() )
+                {
+                    $layer = \XLay\Layer::M;
+                }
+        
+                if( $item->getSoldermask() )
+                {
+                    $layer = $layer | \XLay\Layer::COPPER;
+                }
+
+                $this->setBrush($img, $layer, $size);
 
                 imageline($img, 
                     $last->getX() * Image::SCALE + $this->offset[0]  * Image::SCALE,
@@ -425,9 +462,20 @@ class Image
             $arr[] = -$point->getY() * Image::SCALE + $this->offset[1]  * Image::SCALE;
         }
 
+        $layer = $item->getLayer();
+        if( $item->getPlatedThrough() )
+        {
+            $layer = \XLay\Layer::M;
+        }
+
+        if( $item->getSoldermask() )
+        {
+            $layer = $layer | \XLay\Layer::COPPER;
+        }
+
         $size = $item->getLineWidth()*Image::SCALE;
         if( $size < 1 ) $size = 1;
-        $this->setBrush($img, $item->getLayer(), $size);
+        $this->setBrush($img, $layer, $size);
 
         imagefilledpolygon($img, $arr, count($arr)/2, IMG_COLOR_BRUSHED);
     }

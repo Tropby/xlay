@@ -218,4 +218,9 @@ class Item
     {
         return $this->layer;
     }
+
+    public function getSoldermask() : int
+    {
+        return $this->soldermask;
+    }
 }
