@@ -51,7 +51,7 @@ if( isset( $_FILES["lay6"] ))
         <title>Sprint Layout Image Creator</title>
     </head>
     <body>
-        <h1>Upload your layout</h1>
+        <h1>Upload your SprintLayout File</h1>
         <form method="POST" enctype="multipart/form-data" >
             <input type="file" name="lay6" /><br /><br />
             <select name="layers">
