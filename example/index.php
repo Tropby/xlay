@@ -28,7 +28,8 @@ if( isset( $_FILES["lay6"] ) )
     {
         $file = \XLay\XLay::loadMacro($_FILES["lay6"]["tmp_name"]);
         $renderer = new \XLay\Renderer\Image();
-        $renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+        $renderer->setColorScheme(\XLay\Layer::COLORS_FOTO);
+        $renderer->render($file, $filename, \XLay\Layer::LAYERS_BOTTOM_ONLY_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
     }
 }
 

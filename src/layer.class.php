@@ -8,6 +8,28 @@ class Layer
     const LAYERS_TOP_ONLY_ORDER = [\XLay\Layer::C1,\XLay\Layer::S1,\XLay\Layer::O];
     const LAYERS_BOTTOM_ONLY_ORDER = [\XLay\Layer::C2,\XLay\Layer::S2,\XLay\Layer::O];
 
+    const COLORS_DEFAULT = [
+        Layer::C1 => [30,106,249],
+        Layer::S1 => [255,0,0],
+        Layer::C2 => [0,186,0],
+        Layer::S2 => [225,215,4],
+        Layer::I1 => [194,124,20],
+        Layer::I2 => [238,182,98],
+        Layer::O => [255,255,255],
+        Layer::M => [81,227,253]
+    ];
+
+    const COLORS_FOTO = [
+        Layer::C1 => [11,132,20],
+        Layer::S1 => [255,255,255],
+        Layer::C2 => [11,132,20],
+        Layer::S2 => [255,255,255],
+        Layer::I1 => [0,0,0],
+        Layer::I2 => [0,0,0],
+        Layer::O => [0,255,255],
+        Layer::M => [81,227,253]
+    ];
+
     public const C1 = 1;
     public const S1 = 2;
     public const C2 = 3;

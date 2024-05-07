@@ -9,6 +9,12 @@ class Image
     const SCALE = 20;
 
     private $offset = [0,0];
+    private $colorScheme = \XLay\Layer::COLORS_DEFAULT;
+
+    public function setColorScheme(array $colorScheme)
+    {
+        $this->colorScheme = $colorScheme;
+    }
 
     public function render(
         & $board,
@@ -57,18 +63,16 @@ class Image
 
     private function getColor(& $img, int $layer) : int
     {
-        switch($layer)
+        if( isset( $this->colorScheme[$layer] ) )
         {
-            case \XLay\Layer::C1: return imagecolorallocate($img, 30, 106, 249);
-            case \XLay\Layer::C2: return imagecolorallocate($img, 0, 186, 0);
-            case \XLay\Layer::S1: return imagecolorallocate($img, 255, 0, 0);
-            case \XLay\Layer::S2: return imagecolorallocate($img, 225, 215, 4);
-            case \XLay\Layer::I1: return imagecolorallocate($img, 194, 124, 20);
-            case \XLay\Layer::I2: return imagecolorallocate($img, 238, 182, 98);
-            case \XLay\Layer::O: return imagecolorallocate($img, 255, 255, 255);
-            case \XLay\Layer::M: return imagecolorallocate($img, 81, 227, 253);
-            default: return imagecolorallocate($img, 255, 255, 0);
+            return imagecolorallocate(
+                $img,
+                $this->colorScheme[$layer][0],
+                $this->colorScheme[$layer][1],
+                $this->colorScheme[$layer][2]
+            );
         }
+        return imagecolorallocate($img, 255, 255, 0);
     }
 
     private function setBrush(&$img, int $layer, float $size)
