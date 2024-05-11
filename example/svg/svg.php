@@ -58,6 +58,7 @@ if( isset( $_FILES["lay6"] ))
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     </head>
     <body>
+        <br />
         <div class="container">
         <h1>Upload your SprintLayout File</h1>
         <form method="POST" enctype="multipart/form-data" >
@@ -65,7 +66,7 @@ if( isset( $_FILES["lay6"] ))
             <label class="form-check-label" for="lay6">File (*.lay6)</label>
             <input class="form-control" type="file" name="lay6" /><br />
             <label class="form-check-label" for="layers">Layers</label><br />
-            <select class="form-control" name="layers" id="layers">
+            <select class="form-select" name="layers" id="layers">
                 <option value="LAYERS_DEFAULT_ORDER">Default</option>
                 <option value="LAYERS_TOP_ONLY_ORDER">Top Only</option>
                 <option value="LAYERS_BOTTOM_ONLY_ORDER">Bottom Only</option>
