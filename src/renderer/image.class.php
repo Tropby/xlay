@@ -4,7 +4,7 @@ namespace XLay\Renderer;
 
 use stdClass;
 
-class Image
+class Image implements IRenderer
 {
     const SCALE = 20;
 

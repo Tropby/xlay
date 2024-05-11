@@ -15,4 +15,6 @@ require_once("connection.class.php");
 require_once("trailer.class.php");
 require_once("component.class.php");
 require_once("shapetype.class.php");
+require_once("renderer/irenderer.class.php");
 require_once("renderer/image.class.php");
+require_once("renderer/svg.class.php");

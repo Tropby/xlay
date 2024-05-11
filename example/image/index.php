@@ -14,7 +14,7 @@ function endsWith( $haystack, $needle ) {
 
 if( isset( $_FILES["lay6"] ))
 {
-    require_once("../src/xlay.inc.php");
+    require_once("../../src/xlay.inc.php");
 
     $filename = uniqid("cache_").".png";
 
