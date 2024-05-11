@@ -172,6 +172,7 @@ class SVG implements IRenderer
             $svg = '
                 <path 
                     stroke-linecap="round"
+                    style="fill: none;"
                     stroke-width="'.($size).'" stroke="'.$color.'" d="
                     M '.$startX.' '.$startY.' 
                     A '.($item->getRadius()/2).' '.($item->getRadius()/2).' 0 '.$dir.' 1 '.$endX.' '.$endY.'" />
@@ -438,7 +439,7 @@ class SVG implements IRenderer
         $layer = $item->getLayer();
         if( $item->getPlatedThrough() )
         {
-            $layer = \XLay\Layer::M;
+            //$layer = \XLay\Layer::M;
         }
 
         if( $item->getSoldermask() )
@@ -483,12 +484,12 @@ class SVG implements IRenderer
         }
 
         $size = $item->getLineWidth();
-        if( $size < 1 ) $size = 1;
+        if( $size <= 0 ) $size = 0.1;
 
         $layer = $item->getLayer();
         if( $item->getPlatedThrough() )
         {
-            $layer = \XLay\Layer::M;
+            //$layer = \XLay\Layer::M;
         }
 
         if( $item->getSoldermask() )

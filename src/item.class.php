@@ -199,6 +199,11 @@ class Item
         return $this->y;
     }
 
+    public function getFill() : bool
+    {
+        return $this->styleCustom;
+    }
+
     public function getType() : int
     {
         return $this->type;
