@@ -30,11 +30,18 @@ class SVG implements IRenderer
             width="'.$board->getSizeX().'mm"
             height="'.$board->getSizeY().'mm"
             viewBox="0 0 '.$board->getSizeX().' '.$board->getSizeY().'"
-            '.($flipHorizontal ? 'style="display: block; transform: scale(-1,1)"' : '').'
         >';
 
         $color = $this->getColor(\XLAy\Layer::B);
         $svg .= '<rect fill="'.$color.'" width="'.$board->getSizeX().'" height="'.$board->getSizeY().'" />';
+
+        $transX = $offset[0];
+        if( $flipHorizontal )
+        {
+            $transX -= $board->getSizeX();
+        }
+
+        $svg .= '<g transform="'.($flipHorizontal ? 'scale(-1,1) ' : '').'translate('.$transX.', '.$offset[1].')">';
 
         $objects = $board->getObjects();
 
@@ -68,6 +75,7 @@ class SVG implements IRenderer
             }
         }
 
+        $svg .= '</g>';
         $svg .= '</svg>';
 
         if( $filename )
@@ -257,29 +265,29 @@ class SVG implements IRenderer
             case \XLay\ShapeType::OCTAGON:
 
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY()  + $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4  ,
+                    -$item->getY()  + $item->getOuterRadius() / 2 ],
 
-                    [$item->getX()  + $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX()  + $item->getOuterRadius() / 4  ,
+                    -$item->getY() + $item->getOuterRadius() / 2] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY()  - $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2  ,
+                    -$item->getY()  - $item->getOuterRadius() / 4] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 4  ,
+                    -$item->getY() - $item->getOuterRadius() / 2] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4  ,
+                    -$item->getY() - $item->getOuterRadius() / 2] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 4 + $this->offset[1] ]
+                    [$item->getX() - $item->getOuterRadius() / 2  ,
+                    -$item->getY() - $item->getOuterRadius() / 4]
                 ];
 
                 $svg .= $this->drawPath($points, $color, 0, '#000000');
@@ -310,29 +318,29 @@ class SVG implements IRenderer
 
             case \XLay\ShapeType::OCTAGON_H:
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2  ,
+                    -$item->getY() + $item->getOuterRadius() / 2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2  ,
+                    -$item->getY() + $item->getOuterRadius() / 2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 4 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2  ,
+                    -$item->getY() - $item->getOuterRadius() / 4 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2  ,
+                    -$item->getY() - $item->getOuterRadius() / 2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2  ,
+                    -$item->getY() - $item->getOuterRadius() / 2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 4 + $this->offset[1]] 
+                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2  ,
+                    -$item->getY() - $item->getOuterRadius() / 4 ]
                 ];
                 $svg .= $this->drawPath($points, $color, 0, '#000000');
 
@@ -375,29 +383,29 @@ class SVG implements IRenderer
             case \XLay\ShapeType::OCTAGON_V:
 
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4  ,
+                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 4  ,
+                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2  ,
+                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 2  ,
+                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() + $item->getOuterRadius() / 4  ,
+                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 + $this->offset[1]] ,
+                    [$item->getX() - $item->getOuterRadius() / 4  ,
+                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 2 + $this->offset[0] ,
-                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 + $this->offset[1]] 
+                    [$item->getX() - $item->getOuterRadius() / 2  ,
+                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 ]
                 ];
 
                 $svg = $this->drawPath($points, $color, 0, '#000000');

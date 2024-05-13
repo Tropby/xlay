@@ -41,8 +41,8 @@ class Macro
 
         $this->width = $rect[2] - $rect[0] + 3;
         $this->height = $rect[3] - $rect[1] + 3;
-        $this->offset[0] = -$rect[0] + 3;
-        $this->offset[1] = $rect[3] + 3;
+        $this->offset[0] = -$rect[0] + 1.5;
+        $this->offset[1] = $rect[3] + 1.5;
 
         for( $i = 0; $i < $connectionCount; $i++ )
         {

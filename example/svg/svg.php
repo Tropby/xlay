@@ -63,7 +63,7 @@ if( isset( $_FILES["lay6"] ))
         <h1>Upload your SprintLayout File</h1>
         <form method="POST" enctype="multipart/form-data" >
             <br />
-            <label class="form-check-label" for="lay6">File (*.lay6)</label>
+            <label class="form-check-label" for="lay6">File (*.lay6/*.lmk)</label>
             <input class="form-control" type="file" name="lay6" /><br />
             <label class="form-check-label" for="layers">Layers</label><br />
             <select class="form-select" name="layers" id="layers">
