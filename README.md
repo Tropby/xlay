@@ -15,9 +15,10 @@ The core feature of this library is to analyze a `*.lay6` file and draw its cont
 
 require_once("../src/xlay.inc.php");
 
+$renderer = new \XLay\Renderer\SVG();
 $file = \XLay\XLay::loadLay6("test.lay6");
-$renderer = new \XLay\Renderer\Image();
-$renderer->render($file->getBoards()[0], $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER);
+$svg = $renderer->render($file->getBoards()[0]);
+echo $svg;
 
 ```
 
