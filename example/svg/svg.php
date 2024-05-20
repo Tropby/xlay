@@ -76,7 +76,7 @@ if( isset( $_FILES["lay6"] ) )
         <div class="container">
         <h1>Upload your SprintLayout File</h1>
         <?php
-        if( $errorMessage )
+        if( isset($errorMessage) && $errorMessage )
         {
             echo '<br /><div class="alert alert-danger" role="alert">';
             echo $errorMessage;
@@ -95,20 +95,26 @@ if( isset( $_FILES["lay6"] ) )
                 <option value="LAYERS_BOTTOM_ONLY_ORDER">Bottom Only</option>
             </select><br />
 
-            <input class="form-check-input" type="checkbox" name="photo" id="photo" />
-            <label class="form-check-label" for="photo">Photo Renderer</label><br /><br />
+            <div class="form-check form-switch">
+                <input class="form-check-input" role="switch" type="checkbox" name="photo" id="photo" />
+                <label class="form-check-label" for="photo">Photo Renderer</label><br /><br />
+            </div>
 
-            <input class="form-check-input" type="checkbox" name="lasercut" id="lasercut" />
-            <label class="form-check-label" for="lasercut">Laser Cut<br /><i>(Layer: I1 [cut]/I2 [engrave])</i></label><br /><br />
+            <div class="form-check form-switch">
+                <input class="form-check-input" role="switch" type="checkbox" name="lasercut" id="lasercut" />
+                <label class="form-check-label" for="lasercut">Laser Cut<br /><i>(Layer: I1 [cut]/I2 [engrave])</i></label><br /><br />
+            </div>
 
-            <input class="form-check-input" type="checkbox" name="fliph" id="fliph" />
-            <label class="form-check-label" for="fliph">Flip Horizontal</label><br /><br />
+            <div class="form-check form-switch">
+                <input class="form-check-input" role="switch" type="checkbox" name="fliph" id="fliph" />
+                <label class="form-check-label" for="fliph">Flip Horizontal</label><br /><br />
+            </div>
 
             <input class="btn btn-primary" type="submit" value="Convert" name="submit" />
         </form>
         <hr />
         <?php
-        if( file_exists($filename) )
+        if( isset($filename) && file_exists($filename) )
         {
             echo "<h2>".$_FILES["lay6"]["name"]."</h2>";
             echo '
