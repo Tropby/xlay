@@ -38,6 +38,12 @@ echo $svg;
 
 ```
 
+## Examples
+
+The SVG example will render a SVG image. Therefore a website is created to setup the options for the rendering.
+
+![](res/img/screenshot1.png)
+
 ## ToDo
 
 [HERE](TODO.md)
