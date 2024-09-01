@@ -19,6 +19,7 @@ class Item
 
     private array $style;
 
+    // For Type = 7 (TEXT) this means (show/hide)
     private int $styleCustom;
 
     private float $groundDistance;
@@ -32,6 +33,8 @@ class Item
     private array $points = [];
     private array $textObjects = [];
 
+    private string $text;
+
     private Component $component;
 
     public function parse( array & $data, bool $textChild = false, $layer = null )
@@ -42,7 +45,7 @@ class Item
         $this->out = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->in = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->lineWidth = Helper::getUInt32($data) / 10000.0;
-        Helper::getUInt8($data);; // reserved
+        Helper::getUInt8($data); // reserved
         $this->layer = Helper::getUInt8($data);
         if( $layer ) $this->layer =  $layer;
         $this->shape = Helper::getUInt8($data);
@@ -66,15 +69,17 @@ class Item
 
         if( !$textChild )
         {
-            // TEXT // MARKER // GROUPS ??????
+            // TEXT 
             $len = Helper::getUInt32($data);
-            Helper::getRawData($data, $len);
+            $text = Helper::getRawString($data, $len);
 
+            // MARKER ???? 
             $len = Helper::getUInt32($data);
-            Helper::getRawData($data, $len);
+            Helper::getRawString($data, $len);
 
+            // GROUPS ??????
             $len = Helper::getUInt32($data);
-            Helper::getRawData($data, $len*4);
+            Helper::getRawString($data, $len);
         }
 
         if( $this->type == ItemType::CIRCLE )
@@ -110,6 +115,11 @@ class Item
             $this->points[] = $point;
             $polyCount--;
         }
+    }
+
+    public function showTextObjects() : bool 
+    {
+        return $this->styleCustom;
     }
 
     public function getTextObjects() : array 
@@ -227,5 +237,10 @@ class Item
     public function getSoldermask() : int
     {
         return $this->soldermask;
+    }
+
+    public function getCutoff() : bool
+    {
+        return $this->cutoff;
     }
 }

@@ -49,6 +49,7 @@ class SVG implements IRenderer
         {
             if( $board->hasGroundPlane($layer) )
             {
+                // Draw the groundplane
                 $svg .= 
                     '<rect
                         width="'.($board->getSizeX()).'"
@@ -61,13 +62,14 @@ class SVG implements IRenderer
 
                 foreach($objects as $object)
                 {
-                    if( $object->getLayer() == $layer)
+                    if( $object->getLayer() == $layer && $object->getGroundDistance() > 0)
                     {
                         $svg .= $this->drawObject($object, 0);
                     }
                 }
             }
 
+            // Draw the Layer
             foreach($objects as $object)
             {
                 if( $object->getLayer() == $layer && !$object->getSoldermask())
@@ -85,6 +87,7 @@ class SVG implements IRenderer
             }
         }
 
+        // Draw Throuholes
         foreach( $layers as $layer )
         {
             foreach($objects as $object)
@@ -92,6 +95,18 @@ class SVG implements IRenderer
                 if( $object->getLayer() == $layer || $object->getType() == \XLay\ItemType::THT_PAD)
                 {
                     $svg .= $this->drawObject($object, 2);
+                }
+            }
+        }
+
+        // Draw Drills
+        foreach( $layers as $layer )
+        {
+            foreach($objects as $object)
+            {
+                if( $object->getLayer() == $layer || $object->getType() == \XLay\ItemType::THT_PAD)
+                {
+                    $svg .= $this->drawObject($object, 3);
                 }
             }
         }
@@ -144,8 +159,9 @@ class SVG implements IRenderer
 
             case \XLay\ItemType::THT_PAD:
                 if( $step == 0 ) $svg .= $this->drawTHTPad($item, true);
-                if( $step == 1 ) $svg .= $this->drawTHTPad($item);
-                if( $step == 2 ) $svg .= $this->drawDrill($item);
+                if( !$item->getPlatedThrough() && $step == 1) $svg .= $this->drawTHTPad($item);
+                if( $item->getPlatedThrough() && $step == 2) $svg .= $this->drawTHTPad($item);
+                if( $step == 3 ) $svg .= $this->drawDrill($item);
                 break;
 
             case \XLay\ItemType::SMD_PAD:
@@ -298,7 +314,7 @@ class SVG implements IRenderer
                 $svg .= 
                     '<rect
                         width="'.($outerRadius).'"
-                        height="'.($$outerRadius).'"
+                        height="'.($outerRadius).'"
                         x="'.($item->getX()-$outerRadius/2).'"
                         y="'.(-$item->getY()-$outerRadius/2).'"
                         stroke-width="0"
@@ -479,10 +495,13 @@ class SVG implements IRenderer
     {
         $svg = '';
 
-        $subItems = $item->getTextObjects();
-        foreach( $subItems as $si )
+        if( $item->showTextObjects() )
         {
-            $svg .= $this->drawObject($si, 1);
+            $subItems = $item->getTextObjects();
+            foreach( $subItems as $si )
+            {
+                $svg .= $this->drawObject($si, 1);
+            }
         }
 
         $size = $item->getLineWidth();
@@ -545,9 +564,9 @@ class SVG implements IRenderer
         if( $size <= 0 ) $size = 0.1;
 
         $layer = $item->getLayer();
-        if( $item->getPlatedThrough() )
+        if( $item->getCutOff() )
         {
-            //$layer = \XLay\Layer::M;
+            $layer = \XLay\Layer::B;
         }
 
         if( $item->getSoldermask() )

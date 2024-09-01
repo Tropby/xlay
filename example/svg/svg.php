@@ -16,7 +16,7 @@ function endsWith( $haystack, $needle )
 
 if( isset( $_FILES["lay6"] ) )
 {
-    require_once("../../src/xlay.inc.php");
+    require_once(dirname(__FILE__)."/../../src/xlay.inc.php");
 
     @mkdir("cache");
     $filename = "cache/".uniqid("cache_").".svg";
@@ -118,6 +118,9 @@ if( isset( $_FILES["lay6"] ) )
         if( isset($filename) && file_exists($filename) )
         {
             echo "<h2>".$_FILES["lay6"]["name"]."</h2>";
+
+            $protocol = $_SERVER['HTTPS'] ? 'https://' : 'http://';
+            echo "<a href='".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename'>".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename</a><br />";
             echo '
                 <a download="'.$filename.'" href="'.$filename.'" target="_blank"><img class="img-thumbnail img-fluid"
                     src="'.$filename.'"
