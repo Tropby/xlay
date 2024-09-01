@@ -2,7 +2,6 @@
 
 require_once(dirname(__FILE__)."/xlay.class.php");
 require_once(dirname(__FILE__)."/file.class.php");
-require_once(dirname(__FILE__)."/macro.class.php");
 require_once(dirname(__FILE__)."/helper.class.php");
 require_once(dirname(__FILE__)."/fileheader.class.php");
 require_once(dirname(__FILE__)."/layer.class.php");
@@ -11,6 +10,7 @@ require_once(dirname(__FILE__)."/boardheader.class.php");
 require_once(dirname(__FILE__)."/item.class.php");
 require_once(dirname(__FILE__)."/point.class.php");
 require_once(dirname(__FILE__)."/board.class.php");
+require_once(dirname(__FILE__)."/macro.class.php");
 require_once(dirname(__FILE__)."/connection.class.php");
 require_once(dirname(__FILE__)."/trailer.class.php");
 require_once(dirname(__FILE__)."/component.class.php");
