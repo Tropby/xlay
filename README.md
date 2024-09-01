@@ -3,9 +3,9 @@
 This library is based on the reverse engeneering of Sergey-Raevskiy (https://github.com/sergey-raevskiy/xlay). It can render a layout (with some restrictions).
 
 The Software SprintLayout 6 is published and sold by [Abacom](https://www.electronic-software-shop.com/elektronik-software/sprint-layout-60.html?language=de
-). I do not have anything to do with this company. 
+). I do not have anything to do with this company.
 
-The core feature of this library is to analyze a `*.lay6` file and draw its content in an image. By now only drawing of a pixel image is supported. 
+The core feature of this library is to analyze a `*.lay6` file and draw its content in an image (SVG). It is also working with macro files.
 
 ## Short Example
 
@@ -22,7 +22,7 @@ echo $svg;
 
 ```
 
-![](res/img/output.png)
+![](res/img/output.svg)
 
 ### Render a macro
 
@@ -31,9 +31,10 @@ echo $svg;
 
 require_once("../src/xlay.inc.php");
 
+$renderer = new \XLay\Renderer\SVG();
 $file = \XLay\XLay::loadMacro("test.lmk");
-$renderer = new \XLay\Renderer\Image();
-$renderer->render($file, $filename, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+$svg = $renderer->render($file, null, \XLay\Layer::LAYERS_DEFAULT_ORDER,[0,0,0],[$file->getOffsetX(),$file->getOffsetY()]);
+echo $svg;
 
 ```
 
