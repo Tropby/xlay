@@ -4,16 +4,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function endsWith( $haystack, $needle )
-{
-    $length = strlen( $needle );
-    if( !$length )
-    {
-        return true;
-    }
-    return substr( $haystack, -$length ) === $needle;
-}
-
 if( isset( $_GET["url"] ) )
 {
     require_once(dirname(__FILE__)."/../../src/xlay.inc.php");
@@ -31,4 +21,5 @@ if( isset( $_GET["url"] ) )
 else
 {
     header("HTTP/1.0 404 URL not found!");
+    echo "Usage: url.php?url=https://example.org/filename.lay6";
 }
