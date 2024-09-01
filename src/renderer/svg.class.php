@@ -93,7 +93,9 @@ class SVG implements IRenderer
         $svg .= '<g id="THT">';
         foreach($objects as $object)
         {
-            if( $object->getPlatedThrough() )
+            if( ( in_array($object->getLayer(), $layers) && $object->getPlatedThrough() ) || 
+                ( in_array(\XLay\Layer::C1, $layers) && $object->getPlatedThrough() ) || 
+                ( in_array(\XLay\Layer::C2, $layers) && $object->getPlatedThrough() ) )
             {
                 $svg .= $this->drawObject($object, 2);
             }

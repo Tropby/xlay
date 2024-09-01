@@ -35,8 +35,10 @@ class Layer
         Layer::B => [0,51,0],        
         Layer::C1 => [11,132,20],
         Layer::S1 => [255,255,255],
+        Layer::S1 | Layer::COPPER => [255,255,255],
         Layer::C2 => [11,132,20],
         Layer::S2 => [255,255,255],
+        Layer::S2 | Layer::COPPER => [255,255,255],
         Layer::I1 => [0,255,255],
         Layer::I2 => [0,255,255],
         Layer::O => [0,0,0],
@@ -44,8 +46,8 @@ class Layer
         Layer::C1 | Layer::COPPER => [235,190,44],
         Layer::C2 | Layer::COPPER => [235,190,44],
         Layer::M | Layer::COPPER => [235,190,44],
-        Layer::C1 | Layer::GROUND_PLANE => [235,190,44],
-        Layer::C2 | Layer::GROUND_PLANE => [235,190,44]
+        Layer::C1 | Layer::GROUND_PLANE => [11,132,20],
+        Layer::C2 | Layer::GROUND_PLANE => [11,132,20]
     ];
 
     const COLORS_LASER_CUTTER = [

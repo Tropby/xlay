@@ -120,16 +120,18 @@ if( isset( $_FILES["lay6"] ) )
             echo "<h2>".$_FILES["lay6"]["name"]."</h2>";
 
             $protocol = $_SERVER['HTTPS'] ? 'https://' : 'http://';
-            echo "<a href='".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename'>".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename</a><br />";
+            echo "<a target='_blank' href='".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename'>".$protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']."$filename</a><br />";
             echo '
-                <a download="'.$filename.'" href="'.$filename.'" target="_blank"><img class="img-thumbnail img-fluid"
+                <a href="'.$filename.'" target="_blank"><img class="img-thumbnail img-fluid"
                     src="'.$filename.'"
                     style="width: 100%; max-width: 800px;"
-                /></a><br /><br />';
+                /></a><br />';
+            echo '<a href="'.$filename.'" target="_blank" download="'.$filename.'">Download</a><br /><br />';
         }
         ?>
+        <hr />
+        <div style="text-align: center;"><a href="https://github.com/Tropby/xlay">GitHub Repo</a><br /><br /></div>
         </div>
-        <center><a href="https://github.com/Tropby/xlay">GitHub Repo</a></center>
     </body>
 </html>
 
