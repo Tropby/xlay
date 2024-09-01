@@ -129,6 +129,7 @@ if( isset( $_FILES["lay6"] ) )
         }
         ?>
         </div>
+        <center><a href="https://github.com/Tropby/xlay">GitHub Repo</a></center>
     </body>
 </html>
 
