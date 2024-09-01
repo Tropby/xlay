@@ -15,7 +15,7 @@ class SVG implements IRenderer
     }
 
     public function render(
-        & $board,
+        \Xlay\Board & $board,
         $filename = null,
         $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER,
         $offset = [0,0],
@@ -47,6 +47,27 @@ class SVG implements IRenderer
 
         foreach( $layers as $layer )
         {
+            if( $board->hasGroundPlane($layer) )
+            {
+                $svg .= 
+                    '<rect
+                        width="'.($board->getSizeX()).'"
+                        height="'.($board->getSizeY()).'"
+                        x="0"
+                        y="0"
+                        stroke-width="0"
+                        fill="'.$this->getColor($layer).'"
+                    />';
+
+                foreach($objects as $object)
+                {
+                    if( $object->getLayer() == $layer)
+                    {
+                        $svg .= $this->drawObject($object, 0);
+                    }
+                }
+            }
+
             foreach($objects as $object)
             {
                 if( $object->getLayer() == $layer && !$object->getSoldermask())
@@ -107,18 +128,22 @@ class SVG implements IRenderer
         switch($item->getType())
         {
             case \XLay\ItemType::LINE:
+                if( $step == 0 ) $svg .= $this->drawLine($item, true);
                 if( $step == 1 ) $svg .= $this->drawLine($item);
                 break;
 
             case \XLay\ItemType::CIRCLE:
+                if( $step == 0 ) $svg .= $this->drawCircle($item, true);
                 if( $step == 1 ) $svg .= $this->drawCircle($item);
                 break;
 
             case \XLay\ItemType::POLY:
+                if( $step == 0 ) $svg .= $this->drawPoly($item, true);
                 if( $step == 1 ) $svg .= $this->drawPoly($item);
                 break;
 
             case \XLay\ItemType::THT_PAD:
+                if( $step == 0 ) $svg .= $this->drawTHTPad($item, true);
                 if( $step == 1 ) $svg .= $this->drawTHTPad($item);
                 if( $step == 2 ) $svg .= $this->drawDrill($item);
                 break;
@@ -143,7 +168,7 @@ class SVG implements IRenderer
         return $this->drawPoly($item);
     }
 
-    private function drawCircle(\XLay\Item $item) : string
+    private function drawCircle(\XLay\Item $item, bool $groundPlaneCutting = false) : string
     {
         $size = ($item->getOuterRadius()-$item->getInnerRadius())/2;
 
@@ -151,6 +176,12 @@ class SVG implements IRenderer
         if( $item->getPlatedThrough() )
         {
             $layer = \XLay\Layer::M;
+        }
+
+        if( $groundPlaneCutting )
+        {
+            $size += $item->getGroundDistance() * 2;
+            $layer = \XLay\Layer::B;
         }
 
         if( $item->getSoldermask() )
@@ -164,18 +195,20 @@ class SVG implements IRenderer
 
         if( $item->getStartAngle() != $item->getEndAngle() )
         {
+            $degree = $item->getEndAngle() - $item->getStartAngle();
+            $degree = $degree < 0 ? ($degree + 360) : $degree;
+
             $startX = cos( -$item->getEndAngle() / 180 * pi() ) * $item->getRadius()/2 + $item->getX();
             $startY = sin( -$item->getEndAngle() / 180 * pi() ) * $item->getRadius()/2 + -$item->getY();
     
-            $endX = cos( -$item->getStartAngle() / 180 * pi() ) * $item->getRadius()/2 + $item->getX();
-            $endY = sin( -$item->getStartAngle() / 180 * pi() ) * $item->getRadius()/2 + -$item->getY();
+            $endX1 = cos( (-$item->getEndAngle()+$degree/3) / 180 * pi() ) * $item->getRadius()/2 + $item->getX();
+            $endY1 = sin( (-$item->getEndAngle()+$degree/3) / 180 * pi() ) * $item->getRadius()/2 + -$item->getY();
 
-            $dir = 0;
+            $endX2 = cos( (-$item->getEndAngle()+$degree*2/3) / 180 * pi() ) * $item->getRadius()/2 + $item->getX();
+            $endY2 = sin( (-$item->getEndAngle()+$degree*2/3) / 180 * pi() ) * $item->getRadius()/2 + -$item->getY();
 
-            if(($item->getEndAngle()-180) > $item->getStartAngle())
-            {
-                $dir = 1;
-            }
+            $endX3 = cos( -$item->getStartAngle() / 180 * pi() ) * $item->getRadius()/2 + $item->getX();
+            $endY3 = sin( -$item->getStartAngle() / 180 * pi() ) * $item->getRadius()/2 + -$item->getY();
 
             $svg = '
                 <path 
@@ -183,8 +216,11 @@ class SVG implements IRenderer
                     style="fill: none;"
                     stroke-width="'.($size).'" stroke="'.$color.'" d="
                     M '.$startX.' '.$startY.' 
-                    A '.($item->getRadius()/2).' '.($item->getRadius()/2).' 0 '.$dir.' 1 '.$endX.' '.$endY.'" />
-            ';    
+                    A '.($item->getRadius()/2).' '.($item->getRadius()/2).' 0 0 1 '.$endX1.' '.$endY1.'
+                    A '.($item->getRadius()/2).' '.($item->getRadius()/2).' 0 0 1 '.$endX2.' '.$endY2.'
+                    A '.($item->getRadius()/2).' '.($item->getRadius()/2).' 0 0 1 '.$endX3.' '.$endY3.'
+                    " />
+            ';
         }
         else
         {
@@ -219,7 +255,7 @@ class SVG implements IRenderer
         return $svg;
     }
 
-    private function drawTHTPad(\XLay\Item $item)
+    private function drawTHTPad(\XLay\Item $item, bool $groundPlaneCutting = false)
     {
         $shape = $item->getTHTShape();
 
@@ -234,6 +270,14 @@ class SVG implements IRenderer
             $layer = $layer | \XLay\Layer::COPPER;
         }
 
+        $outerRadius = $item->getOuterRadius();
+
+        if( $groundPlaneCutting )
+        {
+            $outerRadius += $item->getGroundDistance() * 2;
+            $layer = \XLay\Layer::B;
+        }        
+
         $color = $this->getColor($layer);
         $svg = '';
 
@@ -244,7 +288,7 @@ class SVG implements IRenderer
                     '<circle 
                         cx="'.($item->getX()).'"
                         cy="'.(-$item->getY()).'"
-                        r="'.($item->getOuterRadius()/2).'"
+                        r="'.($outerRadius/2).'"
                         stroke-width="0"
                         fill="'.$color.'"
                     />';
@@ -253,10 +297,10 @@ class SVG implements IRenderer
             case \XLay\ShapeType::SQUARE:
                 $svg .= 
                     '<rect
-                        width="'.($item->getOuterRadius()).'"
-                        height="'.($item->getOuterRadius()).'"
-                        x="'.($item->getX()-$item->getOuterRadius()/2).'"
-                        y="'.(-$item->getY()-$item->getOuterRadius()/2).'"
+                        width="'.($outerRadius).'"
+                        height="'.($$outerRadius).'"
+                        x="'.($item->getX()-$outerRadius/2).'"
+                        y="'.(-$item->getY()-$outerRadius/2).'"
                         stroke-width="0"
                         fill="'.$color.'"
                     />';
@@ -265,29 +309,29 @@ class SVG implements IRenderer
             case \XLay\ShapeType::OCTAGON:
 
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4] ,
+                    [$item->getX() - $outerRadius / 2  ,
+                    -$item->getY() + $outerRadius/ 4] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 4  ,
-                    -$item->getY()  + $item->getOuterRadius() / 2 ],
+                    [$item->getX() - $outerRadius / 4  ,
+                    -$item->getY()  + $outerRadius / 2 ],
 
-                    [$item->getX()  + $item->getOuterRadius() / 4  ,
-                    -$item->getY() + $item->getOuterRadius() / 2] ,
+                    [$item->getX() + $outerRadius / 4  ,
+                    -$item->getY() + $outerRadius / 2] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4] ,
+                    [$item->getX() + $outerRadius / 2  ,
+                    -$item->getY() + $outerRadius / 4] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2  ,
-                    -$item->getY()  - $item->getOuterRadius() / 4] ,
+                    [$item->getX() + $outerRadius / 2  ,
+                    -$item->getY()  - $outerRadius / 4] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 4  ,
-                    -$item->getY() - $item->getOuterRadius() / 2] ,
+                    [$item->getX() + $outerRadius / 4  ,
+                    -$item->getY() - $outerRadius / 2] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 4  ,
-                    -$item->getY() - $item->getOuterRadius() / 2] ,
+                    [$item->getX() - $outerRadius / 4  ,
+                    -$item->getY() - $outerRadius / 2] ,
 
-                    [$item->getX() - $item->getOuterRadius() / 2  ,
-                    -$item->getY() - $item->getOuterRadius() / 4]
+                    [$item->getX() - $outerRadius / 2  ,
+                    -$item->getY() - $outerRadius / 4]
                 ];
 
                 $svg .= $this->drawPath($points, $color, 0, '#000000');
@@ -318,29 +362,29 @@ class SVG implements IRenderer
 
             case \XLay\ShapeType::OCTAGON_H:
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4 ],
+                    [$item->getX() - $outerRadius / 2 - $outerRadius/2  ,
+                    -$item->getY() + $outerRadius / 4 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2  ,
-                    -$item->getY() + $item->getOuterRadius() / 2 ],
+                    [$item->getX() - $outerRadius / 4 - $outerRadius/2  ,
+                    -$item->getY() + $outerRadius / 2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2  ,
-                    -$item->getY() + $item->getOuterRadius() / 2 ],
+                    [$item->getX() + $outerRadius / 4 + $outerRadius/2  ,
+                    -$item->getY() + $outerRadius / 2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4 ],
+                    [$item->getX() + $outerRadius / 2 + $outerRadius/2  ,
+                    -$item->getY() + $outerRadius / 4 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2  ,
-                    -$item->getY() - $item->getOuterRadius() / 4 ],
+                    [$item->getX() + $outerRadius / 2 + $outerRadius/2  ,
+                    -$item->getY() - $outerRadius / 4 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2  ,
-                    -$item->getY() - $item->getOuterRadius() / 2 ],
+                    [$item->getX() + $outerRadius / 4 + $outerRadius/2  ,
+                    -$item->getY() - $outerRadius / 2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2  ,
-                    -$item->getY() - $item->getOuterRadius() / 2 ],
+                    [$item->getX() - $outerRadius / 4 - $outerRadius/2  ,
+                    -$item->getY() - $outerRadius / 2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2  ,
-                    -$item->getY() - $item->getOuterRadius() / 4 ]
+                    [$item->getX() - $outerRadius / 2 - $outerRadius/2  ,
+                    -$item->getY() - $outerRadius / 4 ]
                 ];
                 $svg .= $this->drawPath($points, $color, 0, '#000000');
 
@@ -349,10 +393,10 @@ class SVG implements IRenderer
             case \XLay\ShapeType::RECT_H:
                 $svg .= 
                     '<rect
-                        width="'.($item->getOuterRadius()*2).'"
-                        height="'.($item->getOuterRadius()).'"
-                        x="'.($item->getX()-$item->getOuterRadius()).'"
-                        y="'.(-$item->getY()-$item->getOuterRadius()/2).'"
+                        width="'.($outerRadius*2).'"
+                        height="'.($outerRadius).'"
+                        x="'.($item->getX()-$outerRadius).'"
+                        y="'.(-$item->getY()-$outerRadius/2).'"
                         stroke-width="0"
                         fill="'.$color.'"
                     />';
@@ -383,29 +427,29 @@ class SVG implements IRenderer
             case \XLay\ShapeType::OCTAGON_V:
 
                 $points = [
-                    [$item->getX() - $item->getOuterRadius() / 2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 ],
+                    [$item->getX() - $outerRadius / 2  ,
+                    -$item->getY() + $outerRadius / 4 + $outerRadius/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4  ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2 ],
+                    [$item->getX() - $outerRadius / 4  ,
+                    -$item->getY() + $outerRadius / 2 + $outerRadius/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4  ,
-                    -$item->getY() + $item->getOuterRadius() / 2 + $item->getOuterRadius()/2] ,
+                    [$item->getX() + $outerRadius / 4  ,
+                    -$item->getY() + $outerRadius / 2 + $outerRadius/2] ,
 
-                    [$item->getX() + $item->getOuterRadius() / 2  ,
-                    -$item->getY() + $item->getOuterRadius() / 4 + $item->getOuterRadius()/2 ],
+                    [$item->getX() + $outerRadius / 2  ,
+                    -$item->getY() + $outerRadius / 4 + $outerRadius/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 2  ,
-                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 ],
+                    [$item->getX() + $outerRadius / 2  ,
+                    -$item->getY() - $outerRadius / 4 - $outerRadius/2 ],
 
-                    [$item->getX() + $item->getOuterRadius() / 4  ,
-                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 ],
+                    [$item->getX() + $outerRadius / 4  ,
+                    -$item->getY() - $outerRadius / 2 - $outerRadius/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 4  ,
-                    -$item->getY() - $item->getOuterRadius() / 2 - $item->getOuterRadius()/2 ],
+                    [$item->getX() - $outerRadius / 4  ,
+                    -$item->getY() - $outerRadius / 2 - $outerRadius/2 ],
 
-                    [$item->getX() - $item->getOuterRadius() / 2  ,
-                    -$item->getY() - $item->getOuterRadius() / 4 - $item->getOuterRadius()/2 ]
+                    [$item->getX() - $outerRadius / 2  ,
+                    -$item->getY() - $outerRadius / 4 - $outerRadius/2 ]
                 ];
 
                 $svg = $this->drawPath($points, $color, 0, '#000000');
@@ -414,10 +458,10 @@ class SVG implements IRenderer
             case \XLay\ShapeType::RECT_V:
                 $svg .= 
                     '<rect
-                        width="'.($item->getOuterRadius()).'"
-                        height="'.($item->getOuterRadius()*2).'"
-                        x="'.($item->getX()-$item->getOuterRadius()/2).'"
-                        y="'.(-$item->getY()-$item->getOuterRadius()).'"
+                        width="'.($outerRadius).'"
+                        height="'.($outerRadius*2).'"
+                        x="'.($item->getX()-$outerRadius/2).'"
+                        y="'.(-$item->getY()-$outerRadius).'"
                         stroke-width="0"
                         fill="'.$color.'"
                     />';
@@ -431,7 +475,7 @@ class SVG implements IRenderer
         return $svg;
     }
 
-    private function drawLine(\XLay\Item $item)
+    private function drawLine(\XLay\Item $item, bool $groundPlaneCutting = false)
     {
         $svg = '';
 
@@ -455,12 +499,18 @@ class SVG implements IRenderer
             $layer = $layer | \XLay\Layer::COPPER;
         }
 
+        if( $groundPlaneCutting )
+        {
+            $size += $item->getGroundDistance() * 2;
+            $layer = \XLay\Layer::B;
+        }
+
         $points = $item->getPoints();
         $first = true;
 
         $color = $this->getColor($layer);
 
-        $svg .= '<path style="fill: none;" stroke-linecap="round" stroke-width="'.$size.'" stroke="'.$color.'" d="';
+        $svg .= '<path style="fill: none;" stroke-linecap="round" stroke-linejoin="round" stroke-width="'.$size.'" stroke="'.$color.'" d="';
 
         foreach( $points as $point )
         {
@@ -481,7 +531,7 @@ class SVG implements IRenderer
         return $svg;
     }
 
-    private function drawPoly(\XLay\Item $item) : string
+    private function drawPoly(\XLay\Item $item, bool $groundPlaneCutting = false) : string
     {
         $svg = '';
 
@@ -505,12 +555,18 @@ class SVG implements IRenderer
             $layer = $layer | \XLay\Layer::COPPER;
         }
 
+        if( $groundPlaneCutting )
+        {
+            $size += $item->getGroundDistance() * 2;
+            $layer = \XLay\Layer::B;
+        }
+
         $points = $item->getPoints();
         $first = true;
 
         $color = $this->getColor($layer);
 
-        $svg .= '<path fill="'.$color.'" stroke-width="0" stroke-linecap="round" d="';
+        $svg .= '<path fill="'.$color.'" stroke="'.$color.'" stroke-width="'.$size.'" stroke-linejoin="round" stroke-linecap="round" d="';
 
         foreach( $points as $point )
         {
@@ -526,7 +582,7 @@ class SVG implements IRenderer
             $first = false;
         }
 
-        $svg .= '" />';
+        $svg .= ' Z" />';
 
         return $svg;
     }

@@ -35,6 +35,11 @@ class Board
         }
     }
 
+    public function hasGroundPlane(int $Layer) : bool
+    {
+        return $this->header->getGroundPlane($Layer);
+    }
+
     public function getSizeX() : float
     {
         return $this->header->getSizeX();

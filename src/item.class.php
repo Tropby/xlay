@@ -49,12 +49,7 @@ class Item
         Helper::getUInt32($data); // reserved
         $this->componentId = Helper::getUInt16($data);
         $this->selected = Helper::getUInt8($data);
-        $this->style = Helper::getRawData($data, 4);
-        Helper::getUInt8($data);
-        Helper::getUInt8($data);
-        Helper::getUInt8($data);
-        Helper::getUInt8($data);
-        Helper::getUInt8($data);
+        $this->style = Helper::getRawData($data, 9);
         $this->styleCustom = Helper::getUInt8($data);
         $this->groundDistance = Helper::getUInt32($data) / 10000.0;
         Helper::getUInt32($data); // reserved
@@ -150,6 +145,11 @@ class Item
     public function getLineWidth() : float
     {
         return $this->lineWidth;
+    }
+
+    public function getGroundDistance() : float
+    {
+        return $this->groundDistance;
     }
 
     public function getEndAngle() : float

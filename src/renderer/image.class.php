@@ -17,7 +17,7 @@ class Image implements IRenderer
     }
 
     public function render(
-        & $board,
+        \Xlay\Board & $board,
         $filename = null,
         $layers = \XLay\Layer::LAYERS_DEFAULT_ORDER,
         $offset = [0,0],

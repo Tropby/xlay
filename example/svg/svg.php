@@ -18,7 +18,8 @@ if( isset( $_FILES["lay6"] ) )
 {
     require_once("../../src/xlay.inc.php");
 
-    $filename = uniqid("cache_").".svg";
+    @mkdir("cache");
+    $filename = "cache/".uniqid("cache_").".svg";
 
     $renderer = new \XLay\Renderer\SVG();
     if( isset($_POST["photo"]))

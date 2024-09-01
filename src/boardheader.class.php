@@ -7,7 +7,7 @@ class BoardHeader
     private string $name;
     private float $sizeX;
     private float $sizeY;
-    private array $groundPane;
+    private array $groundPlane;
 
     private float $activeGridSize;
     private float $zoom;
@@ -44,7 +44,7 @@ class BoardHeader
 
         $this->sizeX = Helper::getUInt32($data) / 10000.0;
         $this->sizeY = Helper::getUInt32($data) / 10000.0;
-        $this->groundPane = Helper::getRawData($data, 7);
+        $this->groundPlane = Helper::getRawData($data, 7);
         $this->activeGridSize = Helper::getDouble($data) / 10000.0;
         $this->zoom = Helper::getDouble($data);
         $this->viewportOffsetX = Helper::getUInt32($data);
@@ -76,6 +76,11 @@ class BoardHeader
         $this->multilayer = Helper::getUInt8($data) != 0;
 
         $this->objectCount = Helper::getUInt32($data);
+    }
+
+    public function getGroundPlane(int $layer) : bool
+    {
+        return $this->groundPlane[$layer-1];
     }
 
     public function getObjectCount() : int 
