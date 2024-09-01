@@ -2,6 +2,8 @@
 
 namespace XLay\Renderer;
 
+use XLay\XLay;
+
 class SVG implements IRenderer
 {
     const SCALE = 20;
@@ -49,6 +51,8 @@ class SVG implements IRenderer
         {
             if( $board->hasGroundPlane($layer) )
             {
+                $svg .= '<g id="'.\XLay\Layer::getLayerName($layer | \XLay\Layer::GROUND_PLANE).'">';
+
                 // Draw the groundplane
                 $svg .= 
                     '<rect
@@ -57,59 +61,55 @@ class SVG implements IRenderer
                         x="0"
                         y="0"
                         stroke-width="0"
-                        fill="'.$this->getColor($layer).'"
+                        fill="'.$this->getColor($layer | \XLay\Layer::GROUND_PLANE).'"
                     />';
 
                 foreach($objects as $object)
                 {
-                    if( $object->getLayer() == $layer && $object->getGroundDistance() > 0)
+                    if( ($object->getLayer() == $layer || $object->getPlatedThrough()) && $object->getGroundDistance() > 0)
                     {
                         $svg .= $this->drawObject($object, 0);
                     }
                 }
+
+                $svg .= '</g>';
             }
+
+            
+            $svg .= '<g id="'.\XLay\Layer::getLayerName($layer).'">';
 
             // Draw the Layer
             foreach($objects as $object)
             {
-                if( $object->getLayer() == $layer && !$object->getSoldermask())
+                if( $object->getLayer() == $layer )
                 {
                     $svg .= $this->drawObject($object, 1);
                 }
             }
-
-            foreach($objects as $object)
-            {
-                if( $object->getLayer() == $layer && $object->getSoldermask())
-                {
-                    $svg .= $this->drawObject($object, 1);
-                }
-            }
+            $svg .= '</g>';
         }
 
         // Draw Throuholes
-        foreach( $layers as $layer )
+        $svg .= '<g id="THT">';
+        foreach($objects as $object)
         {
-            foreach($objects as $object)
+            if( $object->getPlatedThrough() )
             {
-                if( $object->getLayer() == $layer || $object->getType() == \XLay\ItemType::THT_PAD)
-                {
-                    $svg .= $this->drawObject($object, 2);
-                }
+                $svg .= $this->drawObject($object, 2);
             }
         }
+        $svg .= '</g>';
 
         // Draw Drills
-        foreach( $layers as $layer )
+        $svg .= '<g id="DRILLS">';
+        foreach($objects as $object)
         {
-            foreach($objects as $object)
+            if( $object->getType() == \XLay\ItemType::THT_PAD )
             {
-                if( $object->getLayer() == $layer || $object->getType() == \XLay\ItemType::THT_PAD)
-                {
-                    $svg .= $this->drawObject($object, 3);
-                }
+                $svg .= $this->drawObject($object, 3);
             }
         }
+        $svg .= '</g>';
 
         $svg .= '</g>';
         $svg .= '</svg>';
@@ -134,7 +134,8 @@ class SVG implements IRenderer
                 $this->colorScheme[$layer][1],
                 $this->colorScheme[$layer][2]);
         }
-        return "#FFFF00";
+        
+        throw new \Exception("Can not get color for layer $layer [".dechex($layer)." // ".decbin($layer)."]!<br /><br />".nl2br(print_r($this->colorScheme, true)));
     }
 
     private function drawObject(\XLay\Item $item, int $step) : string
@@ -165,6 +166,7 @@ class SVG implements IRenderer
                 break;
 
             case \XLay\ItemType::SMD_PAD:
+                if( $step == 0 ) $svg .= $this->drawSMDPad($item, true);
                 if( $step == 1 ) $svg .= $this->drawSMDPad($item);
                 break;
 
@@ -179,9 +181,9 @@ class SVG implements IRenderer
         return $svg;
     }
 
-    private function drawSMDPad(\XLay\Item $item) : string
+    private function drawSMDPad(\XLay\Item $item, bool $groundPlaneCutting = false) : string
     {
-        return $this->drawPoly($item);
+        return $this->drawPoly($item, $groundPlaneCutting);
     }
 
     private function drawCircle(\XLay\Item $item, bool $groundPlaneCutting = false) : string
@@ -276,6 +278,7 @@ class SVG implements IRenderer
         $shape = $item->getTHTShape();
 
         $layer = $item->getLayer();
+
         if( $item->getPlatedThrough() )
         {
             $layer = \XLay\Layer::M;
@@ -508,10 +511,6 @@ class SVG implements IRenderer
         if( $size < 0 ) $size = 0.1;
 
         $layer = $item->getLayer();
-        if( $item->getPlatedThrough() )
-        {
-            //$layer = \XLay\Layer::M;
-        }
 
         if( $item->getSoldermask() )
         {
@@ -560,10 +559,18 @@ class SVG implements IRenderer
             $svg .= $this->drawObject($si, 1);
         }
 
-        $size = $item->getLineWidth();
-        if( $size <= 0 ) $size = 0.1;
+        if( $item->getType() != \XLay\ItemType::SMD_PAD )
+        {
+            $size = $item->getLineWidth();
+            if( $size <= 0 ) $size = 0.1;
+        }
+        else
+        {
+            $size = 0;
+        }
 
         $layer = $item->getLayer();
+
         if( $item->getCutOff() )
         {
             $layer = \XLay\Layer::B;
@@ -585,7 +592,15 @@ class SVG implements IRenderer
 
         $color = $this->getColor($layer);
 
-        $svg .= '<path fill="'.$color.'" stroke="'.$color.'" stroke-width="'.$size.'" stroke-linejoin="round" stroke-linecap="round" d="';
+        $lineStyle = "round";
+        $lineJoin = "round";
+        if( $item->getType() == \XLay\ItemType::SMD_PAD )
+        {
+            $lineStyle = "square";
+            $lineJoin = "miter";
+        }
+
+        $svg .= '<path fill="'.$color.'" stroke="'.$color.'" stroke-width="'.$size.'" stroke-linejoin="'.$lineJoin.'" stroke-linecap="'.$lineStyle.'" d="';
 
         foreach( $points as $point )
         {

@@ -40,11 +40,23 @@ class Item
     public function parse( array & $data, bool $textChild = false, $layer = null )
     {
         $this->type = Helper::getUInt8($data);
+
+        if( $this->type == 0 )
+        {
+            throw new \Exception("Error creating object! TYPE: $this->type");
+        }
+
         $this->x = Helper::getFloat($data) / 10000.0;
         $this->y = Helper::getFloat($data) / 10000.0;
         $this->out = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->in = Helper::getFloat($data) / 10000.0 * 2; // 2*r = d
         $this->lineWidth = Helper::getUInt32($data) / 10000.0;
+
+        if( $this->lineWidth > 1000 && $this->type == \XLay\ItemType::LINE)
+        {
+            throw new \Exception("Line with to big ".dechex((int)($this->lineWidth * 10000))."! TYPE: ". $this->type);
+        }
+
         Helper::getUInt8($data); // reserved
         $this->layer = Helper::getUInt8($data);
         if( $layer ) $this->layer =  $layer;
@@ -52,7 +64,8 @@ class Item
         Helper::getUInt32($data); // reserved
         $this->componentId = Helper::getUInt16($data);
         $this->selected = Helper::getUInt8($data);
-        $this->style = Helper::getRawData($data, 9);
+        $this->style = Helper::getRawData($data, 4);
+        Helper::getRawData($data, 5);
         $this->styleCustom = Helper::getUInt8($data);
         $this->groundDistance = Helper::getUInt32($data) / 10000.0;
         Helper::getUInt32($data); // reserved
@@ -75,12 +88,13 @@ class Item
 
             // MARKER ???? 
             $len = Helper::getUInt32($data);
-            Helper::getRawString($data, $len);
+            Helper::getRawData($data, $len);
 
             // GROUPS ??????
             $len = Helper::getUInt32($data);
-            Helper::getRawString($data, $len);
+            Helper::getRawData($data, $len*4);
         }
+        
 
         if( $this->type == ItemType::CIRCLE )
         {
@@ -90,7 +104,7 @@ class Item
         if( $this->type == ItemType::TEXT )
         {
             $textObjectCount = Helper::getUInt32($data);
-            
+
             for($i = 0; $i < $textObjectCount; $i++ )
             {
                 $obj = new Item();
@@ -108,6 +122,12 @@ class Item
         }
 
         $polyCount = Helper::getUInt32($data);
+
+        if( $polyCount > 1000 )
+        {
+            throw new \Exception("Something is wrong with the parser. Polygon with more than 1000 nodes! Node count: $polyCount [".dechex($polyCount)."]");
+        }
+
         while($polyCount)
         {
             $point = new Point();
