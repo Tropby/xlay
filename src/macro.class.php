@@ -2,7 +2,7 @@
 
 namespace XLay;
 
-class Macro
+class Macro extends Board
 {
     private FileHeader $header;
     private array $objects = [];
