@@ -22,8 +22,8 @@ class BoardHeader
     private int $showScannedCopyBottom;
     private string $showScannedCopyTopPath;
     private string $showScannedCopyBottomPath;
-    private int $dpiTop;
-    private int $dpiBottom;
+    private float $dpiTop;
+    private float $dpiBottom;
 
     private int $shiftXTop;
     private int $shiftYTop;
