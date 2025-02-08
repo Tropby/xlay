@@ -12,11 +12,20 @@ if( isset( $_GET["url"] ) )
     $filename = "cache/".uniqid("cache_").".svg";
 
     $renderer = new \XLay\Renderer\SVG();
-    $file = \XLay\XLay::loadLay6FromUrl($_GET["url"]);
-    $svg = $renderer->render($file->getBoards()[0]);
-
-    header("content-type: image/svg+xml");
-    echo $svg;
+    try
+    {
+        $file = \XLay\XLay::loadLay6FromUrl($_GET["url"]);
+        $svg = $renderer->render($file->getBoards()[0]);
+    
+        header("content-type: image/svg+xml");
+        echo $svg;
+        }
+    catch(\Exception $e)
+    {
+        header("HTTP/1.0 404 URL not found!");
+        echo "Failed to load file from URL: \"".$_GET["url"]."\"";
+        die();
+    }
 }
 else
 {

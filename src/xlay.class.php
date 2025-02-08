@@ -31,17 +31,29 @@ class XLay
 
     public static function loadLay6FromUrl(string $url) : File
     {
-        $fileData = file_get_contents($url);
-
-        for( $i = 0; $i < strlen($fileData); $i++ )
+        try
         {
-            $rawData[] = ord($fileData[$i]);
+            $fileData = @file_get_contents($url);
+
+            if( !$fileData )
+            {
+                throw new \Exception("Failed to load file from URL: \"$url\"");
+            }
+
+            for( $i = 0; $i < strlen($fileData); $i++ )
+            {
+                $rawData[] = ord($fileData[$i]);
+            }
+    
+            $file = new File();
+            $file->parse($rawData);
+    
+            return $file;    
         }
-
-        $file = new File();
-        $file->parse($rawData);
-
-        return $file;
+        catch(\Exception $e)
+        {
+            throw new \Exception("Failed to load file from URL: \"$url\"");
+        }
     }    
 
     public static function loadMacro(string $filename) : Macro
